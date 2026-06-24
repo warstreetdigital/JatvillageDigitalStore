@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JAT Village Digital Showroom</title>
+  
+  <!-- Font Integrations -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            orbitron: ["Orbitron", "sans-serif"],
+            rajdhani: ["Rajdhani", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+            sans: ["Inter", "sans-serif"],
+          },
+          colors: {
+            cyber: {
+              cyan: '#00e5ff',
+              amber: '#ffaa00',
+              magenta: '#ff0055',
+              green: '#00e676',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Utility Styles matching original React layout */
+    .premium-card {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .premium-card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    }
+    .neon-border-cyan {
+      border: 1.5px solid #06b6d4;
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.12);
+    }
+    .neon-border-amber {
+      border: 1.5px solid #f59e0b;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+    }
+    .neon-text-cyan {
+      text-shadow: 0 0 4px rgba(6, 182, 212, 0.25);
+    }
+    .neon-text-amber {
+      text-shadow: 0 0 4px rgba(245, 158, 11, 0.25);
+    }
+    .neon-text-green {
+      text-shadow: 0 0 4px rgba(16, 185, 129, 0.25);
+    }
+    .grid-bg {
+      background-color: #f1f5f9;
+      background-image: 
+        radial-gradient(at 50% 0%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.06) 0px, transparent 50%),
+        linear-gradient(to right, rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    }
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 0.9; }
+    }
+    @keyframes scanning {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+    .animate-pulse-slow {
+      animation: pulse-slow 4s infinite ease-in-out;
+    }
+    .animate-scanning {
+      animation: scanning 4s infinite linear;
+    }
+    /* Smooth transition utilities for clean JS state updates */
+    .fade-transition {
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .fade-out {
+      opacity: 0;
+      transform: scale(0.97);
+      pointer-events: none;
+    }
+    .fade-in {
+      opacity: 1;
+      transform: scale(1);
+    }
+  </style>
+</head>
+<body class="grid-bg min-h-screen flex flex-col text-slate-800 font-sans antialiased">
+
+  <!-- ================= LOAD CALIBRATION SCREEN ================= -->
+  <div id="jat-loader" class="fixed inset-0 bg-slate-50 z-50 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-500">
+    <div class="max-w-md w-full relative z-10 space-y-8 p-8 border border-slate-200 rounded-2xl bg-white shadow-xl">
+      <!-- Spinning circular HUD vector -->
+      <div class="relative w-36 h-36 mx-auto flex items-center justify-center">
+        <div class="absolute inset-0 border-2 border-dashed border-cyan-500/20 rounded-full animate-spin [animation-duration:15s]"></div>
+        <div class="absolute inset-2 border border-dashed border-amber-500/20 rounded-full animate-spin [animation-duration:8s] [animation-direction:reverse]"></div>
+        <div class="absolute inset-4 border border-cyan-400 rounded-full flex items-center justify-center bg-cyan-50/50">
+          <i data-lucide="qr-code" class="w-16 h-16 text-cyan-600 animate-pulse"></i>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <h1 class="font-orbitron text-2xl font-bold tracking-widest text-cyan-600 uppercase">
+          JAT VILLAGE
+        </h1>
+        <p class="font-rajdhani text-sm text-slate-500 tracking-wider">
+          FUTURISTIC DIGITAL SHOWROOM • ZIMBABWE
+        </p>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="space-y-2">
+        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200 p-[1px]">
+          <div id="loader-bar" class="bg-gradient-to-r from-cyan-500 to-amber-500 h-full rounded-full transition-all duration-150 shadow-[0_1px_4px_rgba(6,182,212,0.3)]" style="width: 0%"></div>
+        </div>
+        <div class="flex justify-between font-mono text-xs text-slate-500">
+          <span>STATUS: LOADING DIGITAL SHOWROOM</span>
+          <span id="loader-percent" class="text-cyan-600 font-bold">0%</span>
+        </div>
+      </div>
+
+      <!-- Loader controls -->
+      <div class="pt-2">
+        <button id="btn-enable-audio-loader" class="px-4 py-2 rounded font-rajdhani text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 mx-auto uppercase border cursor-pointer bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100">
+          <i data-lucide="volume-x" class="w-4 h-4 text-slate-400"></i>
+          <span>ENABLE TOUCH SOUND EFFECTS</span>
+        </button>
+        <p class="text-[10px] text-slate-400 font-mono mt-2">
+          Highly recommended for an interactive shopping experience.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN DIGITAL INTERFACE ================= -->
+  <header id="jat-header" class="border-b border-slate-200 bg-white/95 sticky top-0 z-40 px-4 py-3 shadow-sm backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      
+      <!-- Brand Left info -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded border border-cyan-200 flex items-center justify-center bg-cyan-50/80 shadow-sm">
+          <i data-lucide="qr-code" class="w-6 h-6 text-cyan-600"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-orbitron text-lg font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-amber-600">
+              JAT VILLAGE
+            </span>
+            <span class="bg-cyan-50 text-cyan-700 border border-cyan-200 text-[9px] font-mono px-1.5 py-0.5 rounded tracking-widest uppercase">
+              QR SHOWROOM
+            </span>
+          </div>
+          <p class="text-[10px] text-slate-500 tracking-wider uppercase font-rajdhani">
+            ⚡ INTERACTIVE STORE CONNECTED NATIONWIDE
+          </p>
+        </div>
+      </div>
+
+      <!-- Center stats -->
+      <div class="hidden lg:flex items-center gap-6 font-mono text-xs text-slate-600 bg-slate-50 border border-slate-200 px-4 py-1.5 rounded-lg shadow-sm">
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-slate-400">STORE STATUS:</span>
+          <span class="text-emerald-600 font-semibold">OPEN</span>
+        </div>
+        <div class="w-[1px] h-4 bg-slate-200"></div>
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="activity" class="w-3.5 h-3.5 text-cyan-600"></i>
+          <span class="text-slate-400">SYSTEM SPEED:</span>
+          <span class="text-cyan-600 font-bold">FAST</span>
+        </div>
+        <div class="w-[1px] h-4 bg-slate-200"></div>
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-600"></i>
+          <span class="text-slate-400">HEAD OFFICE:</span>
+          <span class="text-amber-600 font-semibold">MILTON PARK</span>
+        </div>
+      </div>
+
+      <!-- Right Clock and Mute Toggle -->
+      <div class="flex items-center gap-4">
+        <!-- Harare Clock -->
+        <div class="text-right">
+          <div id="harare-clock" class="font-mono text-sm text-cyan-700 font-bold tracking-widest bg-slate-50 px-3 py-1 rounded-lg border border-slate-200 shadow-sm">
+            00:00:00
+          </div>
+          <p class="text-[9px] text-slate-400 font-mono tracking-widest text-right mt-1">HARARE UTC+2</p>
+        </div>
+
+        <!-- Tactile Audio Switch -->
+        <button id="btn-header-mute" class="p-2 rounded-lg border transition-all cursor-pointer shadow-sm bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300 hover:bg-slate-100" title="Toggle touch sounds">
+          <i data-lucide="volume-x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= CENTRAL CONTROL ROOM DECK ================= -->
+  <main id="jat-viewport" class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    
+    <!-- LEFT COLUMN: THE GRID STORE ORBIT (8 COLS) -->
+    <section class="lg:col-span-8 space-y-6">
+      
+      <!-- DIGITAL CATALOGUE SELECTOR -->
+      <div class="p-5 rounded-xl border border-slate-200/90 bg-white shadow-[0_8px_30px_rgb(15,23,42,0.04)] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="absolute top-0 right-0 p-1 bg-cyan-50 text-cyan-700 text-[8px] font-mono tracking-widest rounded-bl uppercase border-l border-b border-slate-200">
+          DIRECT ORDER LINE
+        </div>
+        
+        <div class="space-y-1">
+          <h2 class="font-orbitron text-sm font-bold tracking-widest text-cyan-700 flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-500 animate-spin [animation-duration:10s]"></i>
+            CHOOSE A DEPARTMENT
+          </h2>
+          <p class="font-sans text-xs text-slate-500 leading-relaxed max-w-md">
+            This digital showroom is accessible instantly via QR code banners, flyers, and billboards. Simply pick a department below to view our active items.
+          </p>
+        </div>
+
+        <!-- Quick Harare Hotline Buttons -->
+        <div class="flex flex-wrap gap-2">
+          <a href="tel:+263777026099" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 hover:text-cyan-700 text-slate-700 rounded-lg font-mono text-[11px] flex items-center gap-1.5 transition-all shadow-sm">
+            <i data-lucide="phone-call" class="w-3.5 h-3.5 text-cyan-600"></i>
+            +263 777 026 099
+          </a>
+          <a href="tel:+263713162114" class="px-3 py-1.5 bg-slate-50 border border-slate-200 hover:border-amber-500 hover:bg-amber-50 hover:text-amber-700 text-slate-700 rounded-lg font-mono text-[11px] flex items-center gap-1.5 transition-all shadow-sm">
+            <i data-lucide="building-2" class="w-3.5 h-3.5 text-amber-600"></i>
+            +263 713 162 114
+          </a>
+        </div>
+      </div>
+
+      <!-- THREE-WAY CATEGORY SELECTION DECK -->
+      <div class="grid grid-cols-3 gap-2 sm:gap-4">
+        
+        <button id="category-solar" class="p-4 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-300 group cursor-pointer relative overflow-hidden bg-cyan-50/80 border-cyan-400 text-cyan-800 shadow-[0_4px_16px_rgba(6,182,212,0.12)]">
+          <div class="absolute top-0 inset-x-0 h-1 bg-cyan-500"></div>
+          <i data-lucide="sun" class="w-8 h-8 mb-2 transition-transform duration-300 group-hover:rotate-45 text-cyan-600 scale-110"></i>
+          <span class="font-orbitron text-xs sm:text-sm font-bold tracking-widest block uppercase">[ SOLAR DEPT ]</span>
+          <span class="text-[9px] font-mono text-slate-400 mt-1 block tracking-wider uppercase">Power Systems</span>
+        </button>
+
+        <button id="category-furniture" class="p-4 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-300 group cursor-pointer relative overflow-hidden bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-800 shadow-[0_4px_12px_rgba(15,23,42,0.03)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
+          <div class="absolute top-0 inset-x-0 h-1 bg-amber-500 hidden"></div>
+          <i data-lucide="sofa" class="w-8 h-8 mb-2 transition-transform duration-300 group-hover:scale-105 text-slate-400"></i>
+          <span class="font-orbitron text-xs sm:text-sm font-bold tracking-widest block uppercase">[ HOME FURNITURE ]</span>
+          <span class="text-[9px] font-mono text-slate-400 mt-1 block tracking-wider uppercase">Sofas & Appliances</span>
+        </button>
+
+        <button id="category-machinery" class="p-4 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-300 group cursor-pointer relative overflow-hidden bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-800 shadow-[0_4px_12px_rgba(15,23,42,0.03)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
+          <div class="absolute top-0 inset-x-0 h-1 bg-rose-500 hidden"></div>
+          <i data-lucide="hammer" class="w-8 h-8 mb-2 transition-transform duration-300 group-hover:-rotate-12 text-slate-400"></i>
+          <span class="font-orbitron text-xs sm:text-sm font-bold tracking-widest block uppercase">[ MACHINERY ]</span>
+          <span class="text-[9px] font-mono text-slate-400 mt-1 block tracking-wider uppercase">Heavy & Industrial</span>
+        </button>
+
+      </div>
+
+      <!-- ACTIVE CATALOG GRID -->
+      <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- JS will populate products here dynamically -->
+      </div>
+
+      <!-- PRODUCT SPECIFICATIONS & COMPATIBILITY VIEWER -->
+      <div id="specifications-panel" class="p-6 rounded-xl border bg-white shadow-md relative overflow-hidden">
+        <!-- JS will populate detailed product specs here dynamically -->
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: SHOPPING BASKET & PROTOCOL COMPILER (4 COLS) -->
+    <section class="lg:col-span-4 space-y-6">
+      
+      <!-- SHOPPING BASKET SUMMARY CARD -->
+      <div class="p-5 rounded-xl border border-slate-200/90 bg-white shadow-lg space-y-4">
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5 font-mono text-[9px] text-cyan-600 font-bold uppercase tracking-widest">
+            <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+            BASKET STATUS: READY
+          </div>
+        </div>
+
+        <h3 class="font-orbitron text-sm font-bold tracking-widest text-slate-800 flex items-center gap-2 uppercase border-b border-slate-100 pb-3">
+          <i data-lucide="shopping-cart" class="w-4 h-4 text-cyan-600"></i>
+          YOUR SELECTED BASKET
+        </h3>
+
+        <!-- Cart Items List -->
+        <div id="cart-container" class="space-y-3 max-h-[250px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Basket Totals -->
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-between font-mono">
+          <span class="text-xs text-slate-500 uppercase tracking-widest font-bold">GRAND TOTAL (USD)</span>
+          <div class="text-right">
+            <span id="cart-grand-total" class="text-xl font-bold text-slate-900">$0.00</span>
+            <span class="text-[10px] text-slate-400 block leading-none">FREE SHOPPING PROTOCOL</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CHOOSE RETRIEVAL METHOD & WHATSAPP CHECKOUT FORM -->
+      <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-lg space-y-4">
+        
+        <h3 class="font-orbitron text-sm font-bold tracking-widest text-slate-800 flex items-center gap-2 uppercase border-b border-slate-100 pb-3">
+          <i data-lucide="send" class="w-4 h-4 text-amber-600"></i>
+          CHOOSE DELIVERY OR PICK UP
+        </h3>
+
+        <!-- Checkout View Switcher (Active state compile vs success display) -->
+        <div id="checkout-form-container">
+          
+          <form id="checkout-form" class="space-y-4">
+            
+            <!-- Method Selector -->
+            <div class="space-y-1.5">
+              <label class="font-orbitron text-[10px] text-slate-700 font-semibold uppercase tracking-widest block">
+                HOW DO YOU WANT IT?
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" id="protocol-pickup" class="py-2 px-3 rounded-lg border font-rajdhani text-xs font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-cyan-50 border-cyan-500 text-cyan-800 shadow-sm">
+                  <i data-lucide="building-2" class="w-3.5 h-3.5 animate-pulse"></i>
+                  COLLECT IN STORE
+                </button>
+                <button type="button" id="protocol-delivery" class="py-2 px-3 rounded-lg border font-rajdhani text-xs font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 border-slate-300 text-slate-600 hover:border-slate-400 hover:text-slate-800 shadow-sm">
+                  <i data-lucide="truck" class="w-3.5 h-3.5"></i>
+                  DELIVERY AT HOME
+                </button>
+              </div>
+            </div>
+
+            <!-- Conditional Pickup / Delivery Form Fields -->
+            <div id="conditional-fields-container">
+              <!-- Pickup subform (Default) -->
+              <div id="subform-pickup" class="space-y-2 bg-slate-50/80 p-3 rounded-xl border border-slate-250 shadow-inner">
+                <label class="font-orbitron text-[9px] text-slate-700 font-bold uppercase tracking-widest block">
+                  SELECT OUR NEAREST PICKUP SHOP
+                </label>
+                <div class="space-y-2">
+                  <label class="flex items-start gap-2.5 cursor-pointer group p-1">
+                    <input type="radio" name="pickup_loc" value="milton_park" checked class="mt-1 accent-cyan-600 cursor-pointer text-cyan-600 focus:ring-0 focus:ring-offset-0">
+                    <div class="text-xs font-sans text-slate-700 group-hover:text-slate-900">
+                      <span class="font-bold text-slate-900 block">Milton Park Head Office</span>
+                      25 Harvey Brown, Milton Park, Harare
+                    </div>
+                  </label>
+                  <label class="flex items-start gap-2.5 cursor-pointer group p-1 border-t border-slate-200/80 pt-2">
+                    <input type="radio" name="pickup_loc" value="cbd" class="mt-1 accent-cyan-600 cursor-pointer text-cyan-600 focus:ring-0 focus:ring-offset-0">
+                    <div class="text-xs font-sans text-slate-700 group-hover:text-slate-900">
+                      <span class="font-bold text-slate-900 block">Harare CBD Branch</span>
+                      Shop 50, Cameron Street, Harare CBD
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Delivery subform (Hidden initially) -->
+              <div id="subform-delivery" class="hidden space-y-2 bg-slate-50/80 p-3 rounded-xl border border-slate-250 shadow-inner">
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="space-y-1">
+                    <label class="font-orbitron text-[9px] text-slate-700 font-bold uppercase tracking-wider block">
+                      TOWN / CITY IN ZIMBABWE
+                    </label>
+                    <select id="delivery-city" class="w-full bg-white border border-slate-300 text-xs font-mono text-slate-900 p-2 rounded-lg focus:outline-none focus:border-amber-500 cursor-pointer">
+                      <!-- Cities populated via script -->
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <span class="font-orbitron text-[9px] text-slate-700 font-bold uppercase tracking-wider block mt-0.5">
+                      DELIVERY NOTES
+                    </span>
+                    <div class="text-[10px] font-mono text-slate-700 font-semibold pt-2.5">
+                      ⚡ DELIVERY AT CUSTOM RATE
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="font-orbitron text-[9px] text-slate-700 font-bold uppercase tracking-wider block">
+                    PHYSICAL DELIVERY STREET ADDRESS
+                  </label>
+                  <input type="text" id="delivery-address" placeholder="Plot No, Street, Suburb Name" class="w-full bg-white border border-slate-300 text-xs font-sans text-slate-900 p-2 rounded-lg focus:outline-none focus:border-amber-500">
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Customer Details -->
+            <div class="space-y-1">
+              <label class="font-orbitron text-[10px] text-slate-700 font-semibold uppercase tracking-widest block">
+                YOUR FULL NAME
+              </label>
+              <input type="text" id="input-name" required placeholder="e.g. Tinashe Moyo" class="w-full bg-white border border-slate-300 text-xs font-sans text-slate-900 placeholder:text-slate-400 p-2.5 rounded-lg focus:outline-none focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition-all shadow-sm">
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-orbitron text-[10px] text-slate-700 font-semibold uppercase tracking-widest block">
+                WHATSAPP / CONTACT PHONE
+              </label>
+              <input type="tel" id="input-phone" required placeholder="e.g. 0777026099" class="w-full bg-white border border-slate-300 text-xs font-mono text-slate-900 placeholder:text-slate-400 p-2.5 rounded-lg focus:outline-none focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition-all shadow-sm">
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-orbitron text-[10px] text-slate-700 font-semibold uppercase tracking-widest block">
+                SPECIAL DELIVERY/PRODUCT REQUESTS
+              </label>
+              <textarea id="input-notes" placeholder="Preferred color of couch, special delivery times, borehole depth specs, etc..." rows="2" class="w-full bg-white border border-slate-300 text-xs font-sans text-slate-900 placeholder:text-slate-400 p-2.5 rounded-lg focus:outline-none focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition-all shadow-sm resize-none"></textarea>
+            </div>
+
+            <button type="submit" id="btn-transmit-checkout" class="w-full py-3 bg-gradient-to-r from-cyan-600 to-amber-600 hover:from-cyan-500 hover:to-amber-500 text-white font-orbitron font-extrabold text-xs tracking-widest rounded-lg uppercase transition-all shadow-md cursor-pointer">
+              COMPILE MY WHATSAPP ORDER
+            </button>
+
+          </form>
+
+        </div>
+
+        <!-- ORDER COMPILED SUCCESS HUB -->
+        <div id="checkout-success-hub" class="hidden p-4 rounded-xl border border-cyan-200 bg-cyan-50/20 text-center space-y-4">
+          <div class="w-12 h-12 rounded-full bg-cyan-50 border border-cyan-200 flex items-center justify-center mx-auto">
+            <i data-lucide="check-circle-2" class="w-6 h-6 text-cyan-600 animate-pulse"></i>
+          </div>
+          
+          <div class="space-y-1">
+            <h4 class="font-orbitron text-xs font-bold tracking-widest text-cyan-700 uppercase">
+              ORDER READY TO SEND
+            </h4>
+            <p class="text-[11px] text-slate-600 font-sans">
+              Your order has been compiled! Tap the button below to send it to us on WhatsApp to confirm delivery details or pickup time.
+            </p>
+          </div>
+
+          <div class="pt-2 space-y-2">
+            <a id="link-whatsapp-send" href="#" target="_blank" class="w-full px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-orbitron font-bold text-xs tracking-widest rounded-lg uppercase transition-all shadow-md block text-center cursor-pointer">
+              SEND ORDER TO WHATSAPP 🚀
+            </a>
+
+            <button type="button" id="btn-edit-transmission" class="w-full px-4 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-mono text-[10px] rounded-lg tracking-wider uppercase transition-all cursor-pointer shadow-sm">
+              EDIT MY BASKET
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================= FOOTER AND PROTOCOL SUMMARY INFO ================= -->
+  <footer id="jat-footer" class="mt-auto border-t border-slate-200 bg-white py-6 px-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+      <div>
+        <h4 class="font-orbitron text-xs font-extrabold tracking-widest text-slate-800 uppercase flex items-center justify-center md:justify-start gap-1.5">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+          SECURE ENCRYPTED WHATSAPP DIRECTORY
+        </h4>
+        <p class="text-[10px] text-slate-400 font-mono tracking-wider mt-1">
+          © 2026 JAT VILLAGE INVESTMENTS. ZERO DATABASE COOKIES. DIRECT SECURE LINK.
+        </p>
+      </div>
+      <div class="flex items-center gap-4 text-xs font-mono text-slate-500">
+        <span>STORE PROTOCOL: DIRECT CHAT API</span>
+        <span class="text-slate-300">|</span>
+        <span>LOCATION: HARARE, ZIMBABWE</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= DATA, STATE & BUSINESS ENGINE ================= -->
+  <script>
+    // --- PRODUCTS CATALOG DATABASE ---
+    const PRODUCTS = [
+      {
+        id: 'sol-1kva',
+        name: '1KVA Hybrid Solar Package',
+        category: 'solar',
+        price: 780,
+        badge: 'Popular Budget',
+        image: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=600&q=80',
+        description: 'Perfect starter kit for basic home essentials, entertainment, and modern remote working setups.',
+        features: [
+          '1KVA Hybrid Inverter',
+          '12.8V 100AH Lithium Battery',
+          '2x 450W Mono Solar Panels',
+          'Solar Mountings & Protection Kit',
+          'Solar Cables & Accessories Included',
+          'Full Standard Installation included'
+        ],
+        powers: [
+          'DC Fridge / Energy-efficient Fridge',
+          'Home Lights (LEDs)',
+          'Home Wi-Fi Router',
+          'Laptop & Phone Charging Stations',
+          'TV & Home Entertainment',
+          'DSTV / Decoder'
+        ]
+      },
+      {
+        id: 'sol-2kva',
+        name: '2KVA Hybrid Solar Package',
+        category: 'solar',
+        price: 820,
+        badge: 'Best Value Starter',
+        image: 'https://pub-e10a28ca38cf452da437555e0f90e288.r2.dev/74f093f2f6c974838f206ce52d2b13a4.jpg',
+        description: 'Enhanced voltage package allowing greater appliance load and faster lithium battery recharging.',
+        features: [
+          '2KVA Hybrid Inverter',
+          '25.6V 100AH Lithium Battery (High Performance)',
+          '2x 550W Mono Solar Panels',
+          'Solar Mountings & Protection Kit',
+          'Solar Cables & Accessories Included',
+          'Full Standard Installation included'
+        ],
+        powers: [
+          'DC Fridge / Energy-efficient Fridge',
+          'Home Lights (LEDs)',
+          'Home Wi-Fi Router',
+          'Laptop & Phone Charging Stations',
+          'TV & Home Entertainment Systems',
+          'Decoder & Fans'
+        ]
+      },
+      {
+        id: 'sol-32kva',
+        name: '3.2KVA Hybrid Solar Package',
+        category: 'solar',
+        price: 1200,
+        badge: 'Medium Home Standard',
+        image: 'https://images.unsplash.com/photo-1613665813446-82a78c468a1d?auto=format&fit=crop&w=600&q=80',
+        description: 'Capable power output for modern townhouses, supplying stable energy for water pumps and standard fridges.',
+        features: [
+          '3.2KVA Hybrid Inverter',
+          '25.6V 100AH Lithium Battery',
+          '4x 550W Mono Solar Panels',
+          'Solar Mountings & Protection Kit',
+          'Solar Cables & Accessories Included',
+          'Full Standard Installation included'
+        ],
+        powers: [
+          'Upright & DC Fridges',
+          'Home Lights (LEDs)',
+          'Home Wi-Fi Router',
+          'Multiple Laptops & Phone Chargers',
+          'TV & Home Entertainment Systems',
+          '0.5HP Water Pump / Borehole',
+          'Ceiling & Pedestal Fans'
+        ]
+      },
+      {
+        id: 'sol-42kva',
+        name: '4.2KVA Hybrid Solar Package',
+        category: 'solar',
+        price: 1320,
+        badge: 'Recommended Choice',
+        image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=600&q=80',
+        description: 'Heavy duty, mid-tier package supporting full household lights, entertainment networks, and borehole pumps.',
+        features: [
+          '4.2KVA Hybrid Inverter',
+          '25.6V 100AH Lithium Battery',
+          '4x 640W Mono Solar Panels (Premium)',
+          'Solar Mountings & Protection Kit',
+          'Solar Cables & Accessories Included',
+          'Full Standard Installation included'
+        ],
+        powers: [
+          'Upright & DC Fridges',
+          'All Home Lights (LEDs)',
+          'Multiple TVs & Wi-Fi',
+          'Laptops, Charging & Decoders',
+          '0.5HP Borehole Pump / Water Booster',
+          'Household Fans'
+        ]
+      },
+      {
+        id: 'sol-55kva',
+        name: '5.5KVA Hybrid Solar Package',
+        category: 'solar',
+        price: 1850,
+        badge: 'Premium Power',
+        image: 'https://images.unsplash.com/photo-1548613053-220676218d87?auto=format&fit=crop&w=600&q=80',
+        description: 'Heavy-duty household and gate automation system designed to eliminate load shedding completely.',
+        features: [
+          '5.5KVA Hybrid Inverter',
+          '51.2V 100AH Lithium Battery (Heavy Duty)',
+          '6x 550W Mono Solar Panels',
+          'Solar Mountings & Protection Kit',
+          'Solar Cables & Accessories Included',
+          'Full Standard Installation included'
+        ],
+        powers: [
+          'Upright Fridge & Deep Freezers',
+          'Full House Lighting (LED)',
+          'Multiple TVs, Wi-Fi & Audio Systems',
+          'Home Office Setup (Computers, Printers)',
+          '0.75HP to 1HP Borehole Pump',
+          'Electric Gate Motor & Security Fence',
+          'Microwave (Eco mode)'
+        ]
+      },
+      {
+        id: 'sol-62kva',
+        name: '6.2KVA Hybrid Solar Package',
+        category: 'solar',
+        price: 1900,
+        badge: 'Ultimate Elite Package',
+        image: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=600&q=80',
+        description: 'Maximum capacity system for large estates, agricultural boreholes, luxury villas, and multi-tenant homes.',
+        features: [
+          '6.2KVA Hybrid Inverter (Commercial Grade)',
+          '51.2V 100AH Lithium Battery (Heavy Duty)',
+          '6x 640W Mono Solar Panels',
+          'Solar Mountings & Protection Kit',
+          'Solar Cables & Accessories Included',
+          'Full Standard Installation included'
+        ],
+        powers: [
+          'Upright Fridge & Deep Freezers',
+          'Full House Lighting (LEDs)',
+          'Entertainment Hub & Full Smart Home System',
+          'Home Office Setup & Laptops',
+          '0.75HP to 1HP Water Pump',
+          'Electric Gate Motors & Alarm Systems',
+          'Washing Machine (Eco cycle)'
+        ]
+      },
+      {
+        id: 'fur-couch',
+        name: 'Luxury JAT Comfort Couch Set',
+        category: 'furniture',
+        price: 850,
+        badge: 'Showroom Star',
+        image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80',
+        description: 'Luxurious L-shaped family sofa designed with robust structural timber frames and high-density foam upholstery.',
+        features: [
+          'Plush, premium easy-clean fabric',
+          'Sturdy Zimbabwean teak hardwood legs',
+          'Includes 6 matching custom throw pillows',
+          'Available in charcoal gray, royal blue, or warm beige'
+        ]
+      },
+      {
+        id: 'fur-dining-table',
+        name: 'Elegant Solid Hardwood Dining Table',
+        category: 'furniture',
+        price: 350,
+        badge: 'Handcrafted',
+        image: 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=600&q=80',
+        description: 'Gorgeous 6-seater dining table handcrafted from native hard timber. Sleek minimalist style fits any home.',
+        features: [
+          '100% Solid African teak timber structure',
+          'Heat, scratch, and water-resistant protective sealant',
+          'Sleek modern angular leg design',
+          'Table dimensions: 180cm x 90cm x 75cm'
+        ]
+      },
+      {
+        id: 'fur-kitchen-chairs',
+        name: 'Premium Kitchen Chair Set (6 Pcs)',
+        category: 'furniture',
+        price: 240,
+        image: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=600&q=80',
+        description: 'Ultra-durable, ergonomically contoured kitchen chairs with reinforced steel frames and comfortable padded seats.',
+        features: [
+          'Rust-proof powder coated matte black legs',
+          'High-resilience foam padding for posture support',
+          'Non-scratch rubber floor protectors pre-installed',
+          'Wipe-clean faux leather upholstery'
+        ]
+      },
+      {
+        id: 'fur-fridge',
+        name: 'Double-Door Solar-Friendly Smart Fridge',
+        category: 'furniture',
+        price: 650,
+        badge: 'Solar Optimized',
+        image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=80',
+        description: 'High-efficiency A+++ double door refrigerator, custom-optimized to draw minimal surge currents from hybrid solar package inverters.',
+        features: [
+          'Total capacity: 320 Litres (Fridge + Freezer)',
+          'Smart Inverter Compressor (Super low startup surge)',
+          'Eco-LED internal lighting system',
+          'Works seamlessly on 1KVA or 2KVA JAT solar systems'
+        ]
+      },
+      {
+        id: 'mach-jackhammer',
+        name: 'JAT Pro Jack Hammer Drill Rig',
+        category: 'machinery',
+        price: 450,
+        badge: 'Heavy Duty Tool',
+        image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&q=80',
+        description: 'Professional-grade electric concrete and rock breaker, perfect for Zimbabwean mining operations and construction foundations.',
+        features: [
+          'High impact rate: 1900 blows per minute',
+          'Robust 2200W commercial-grade motor',
+          '360-degree adjustable auxiliary handle',
+          'Comes with pointed chisel, flat chisel, and heavy steel transport case'
+        ]
+      },
+      {
+        id: 'mach-generator',
+        name: 'Portable Backup Petrol Generator (5KVA)',
+        category: 'machinery',
+        price: 550,
+        badge: 'Emergency Power',
+        image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80',
+        description: 'High-reliability single-phase petrol generator equipped with push-button electric starter and low-oil shutdown protector.',
+        features: [
+          '5.0KVA maximum peak output, 4.5KVA continuous running load',
+          'Large 25-litre fuel tank with fuel gauge (up to 10 hours runtime)',
+          'AVR (Automatic Voltage Regulator) for clean power output',
+          '100% copper alternator winding'
+        ]
+      },
+      {
+        id: 'mach-lithium-battery',
+        name: 'Premium 100Ah 51.2V Solar Lithium Battery',
+        category: 'machinery',
+        price: 950,
+        badge: 'Long Life Battery',
+        image: 'https://images.unsplash.com/photo-1548345680-f5475ea5df84?auto=format&fit=crop&w=600&q=80',
+        description: 'Deep-cycle LiFePO4 solar storage battery featuring a state-of-the-art smart Battery Management System (BMS).',
+        features: [
+          'Standard 19-inch rack-mountable or wall-mounted setup',
+          'Over 6000 charging cycles at 80% Depth of Discharge',
+          'Integrated LCD screen showing real-time voltage and cell balance',
+          'Compatible with JAT, Must, Doyo, and Growatt hybrid solar inverters'
+        ]
+      }
+    ];
+
+    const ZIMBABWE_CITIES = [
+      'Harare', 'Bulawayo', 'Chitungwiza', 'Mutare', 'Gweru', 
+      'Kwekwe', 'Kadoma', 'Masvingo', 'Chinoyi', 'Norton', 
+      'Marondera', 'Ruwa', 'Chegutu', 'Beitbridge', 'Victoria Falls', 
+      'Hwange', 'Zvishavane', 'Gwanda', 'Bindura'
+    ];
+
+    // --- STATE VARIABLES ---
+    let soundActive = false;
+    let selectedCategory = 'solar';
+    let selectedProduct = PRODUCTS.find(p => p.category === 'solar') || null;
+    let cart = [];
+    let orderDetails = {
+      name: '',
+      phone: '',
+      method: 'pickup',
+      pickupLocation: 'milton_park',
+      deliveryCity: 'Harare',
+      deliveryAddress: '',
+      notes: ''
+    };
+
+    // --- SOUND ENGINE (Web Audio API) ---
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+    }
+
+    function playSound(type) {
+      if (!soundActive) return;
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const now = audioCtx.currentTime;
+        
+        switch (type) {
+          case 'click': {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1400, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+            osc.start(now);
+            osc.stop(now + 0.05);
+            break;
+          }
+          case 'hover': {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.setValueAtTime(1200, now + 0.02);
+            gain.gain.setValueAtTime(0.02, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+            osc.start(now);
+            osc.stop(now + 0.03);
+            break;
+          }
+          case 'success': {
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+              gain.gain.setValueAtTime(0, now);
+              gain.gain.linearRampToValueAtTime(0.05, now + idx * 0.06);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.15);
+              osc.start(now + idx * 0.06);
+              osc.stop(now + idx * 0.06 + 0.15);
+            });
+            break;
+          }
+          case 'hologram': {
+            const osc = audioCtx.createOscillator();
+            const filter = audioCtx.createBiquadFilter();
+            const gain = audioCtx.createGain();
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(60, now);
+            osc.frequency.exponentialRampToValueAtTime(320, now + 0.4);
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(150, now);
+            filter.frequency.exponentialRampToValueAtTime(800, now + 0.4);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+            osc.start(now);
+            osc.stop(now + 0.45);
+            break;
+          }
+          case 'scanning': {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.exponentialRampToValueAtTime(1500, now + 0.35);
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.linearRampToValueAtTime(0.1, now + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.start(now);
+            osc.stop(now + 0.35);
+            break;
+          }
+          case 'error': {
+            const osc1 = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc1.type = 'sawtooth';
+            osc2.type = 'sawtooth';
+            osc1.frequency.setValueAtTime(120, now);
+            osc2.frequency.setValueAtTime(118, now);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + 0.25);
+            osc2.stop(now + 0.25);
+            break;
+          }
+        }
+      } catch (e) {
+        console.error("Audio playback failure", e);
+      }
+    }
+
+    // --- TIME PROTOCOL (Harare Clock Africa/Harare is UTC+2) ---
+    function updateClock() {
+      const now = new Date();
+      try {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'Africa/Harare',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
+        document.getElementById('harare-clock').innerText = formatter.format(now);
+      } catch (e) {
+        document.getElementById('harare-clock').innerText = now.toTimeString().split(' ')[0];
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // --- INITIAL PROGRESS SIMULATOR ---
+    let loadPercent = 0;
+    const progressInterval = setInterval(() => {
+      loadPercent += Math.floor(Math.random() * 15) + 5;
+      if (loadPercent >= 100) {
+        loadPercent = 100;
+        clearInterval(progressInterval);
+        setTimeout(() => {
+          const loader = document.getElementById('jat-loader');
+          loader.style.opacity = '0';
+          setTimeout(() => {
+            loader.style.display = 'none';
+            if (soundActive) playSound('hologram');
+          }, 500);
+        }, 600);
+      }
+      document.getElementById('loader-bar').style.width = `${loadPercent}%`;
+      document.getElementById('loader-percent').innerText = `${loadPercent}%`;
+    }, 150);
+
+    // --- TOGGLE MUTE LOGIC ---
+    function setMuteState(active) {
+      soundActive = active;
+      const loaderBtn = document.getElementById('btn-enable-audio-loader');
+      const headerBtn = document.getElementById('btn-header-mute');
+      
+      const onIcon = '<i data-lucide="volume-2" class="w-4 h-4 text-cyan-600 animate-pulse"></i>';
+      const offIcon = '<i data-lucide="volume-x" class="w-4 h-4 text-slate-400"></i>';
+      const headerOnIcon = '<i data-lucide="volume-2" class="w-5 h-5 text-cyan-600 animate-pulse"></i>';
+      const headerOffIcon = '<i data-lucide="volume-x" class="w-5 h-5 text-slate-400"></i>';
+
+      if (soundActive) {
+        initAudio();
+        loaderBtn.className = "px-4 py-2 rounded font-rajdhani text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 mx-auto uppercase border cursor-pointer bg-cyan-50 border-cyan-300 text-cyan-700 shadow-sm";
+        loaderBtn.innerHTML = onIcon + '<span>TOUCH SOUNDS ON</span>';
+        
+        headerBtn.className = "p-2 rounded-lg border transition-all cursor-pointer shadow-sm bg-cyan-50 border-cyan-300 text-cyan-600 shadow-[0_2px_8px_rgba(6,182,212,0.1)]";
+        headerBtn.innerHTML = headerOnIcon;
+        playSound('click');
+      } else {
+        loaderBtn.className = "px-4 py-2 rounded font-rajdhani text-xs font-bold tracking-wider transition-all duration-300 flex items-center gap-2 mx-auto uppercase border cursor-pointer bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100";
+        loaderBtn.innerHTML = offIcon + '<span>ENABLE TOUCH SOUND EFFECTS</span>';
+        
+        headerBtn.className = "p-2 rounded-lg border transition-all cursor-pointer shadow-sm bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300 hover:bg-slate-100";
+        headerBtn.innerHTML = headerOffIcon;
+      }
+      lucide.createIcons();
+    }
+
+    document.getElementById('btn-enable-audio-loader').addEventListener('click', () => setMuteState(!soundActive));
+    document.getElementById('btn-header-mute').addEventListener('click', () => setMuteState(!soundActive));
+
+    // --- DEPARTMENT ICONS HELPER ---
+    function getCategoryIconHtml(category) {
+      if (category === 'solar') return '<i data-lucide="sun" class="w-3.5 h-3.5 text-cyan-500 shrink-0"></i>';
+      if (category === 'furniture') return '<i data-lucide="sofa" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>';
+      return '<i data-lucide="hammer" class="w-3.5 h-3.5 text-rose-500 shrink-0"></i>';
+    }
+
+    // --- PRODUCTS RENDER SYSTEM ---
+    function renderProducts() {
+      const grid = document.getElementById('catalog-grid');
+      grid.innerHTML = '';
+      
+      const filtered = PRODUCTS.filter(p => p.category === selectedCategory);
+      
+      filtered.forEach(product => {
+        const isSelected = selectedProduct && selectedProduct.id === product.id;
+        
+        let borderClass = 'border-slate-200 bg-white shadow-[0_4px_12px_rgba(15,23,42,0.03)] hover:border-slate-300';
+        if (isSelected) {
+          if (selectedCategory === 'solar') borderClass = 'border-cyan-400 bg-cyan-50/40 shadow-[0_4px_16px_rgba(6,182,212,0.12)]';
+          else if (selectedCategory === 'furniture') borderClass = 'border-amber-400 bg-amber-50/20 shadow-[0_4px_16px_rgba(245,158,11,0.1)]';
+          else borderClass = 'border-rose-400 bg-rose-50/30 shadow-[0_4px_16px_rgba(244,63,94,0.1)]';
+        }
+
+        let badgeHtml = '';
+        if (product.badge) {
+          let badgeColors = 'bg-cyan-50 text-cyan-700 border-cyan-200';
+          if (selectedCategory === 'furniture') badgeColors = 'bg-amber-50 text-amber-700 border-amber-200';
+          if (selectedCategory === 'machinery') badgeColors = 'bg-rose-50 text-rose-700 border-rose-200';
+          
+          badgeHtml = `<span class="text-[9px] font-mono font-bold tracking-widest px-2 py-0.5 rounded border uppercase ${badgeColors}">${product.badge}</span>`;
+        }
+
+        let buttonColors = 'bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100 hover:border-cyan-300 hover:text-cyan-800';
+        if (selectedCategory === 'furniture') buttonColors = 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100 hover:border-amber-300 hover:text-amber-800';
+        if (selectedCategory === 'machinery') buttonColors = 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 hover:border-rose-300 hover:text-rose-800';
+
+        const productCard = document.createElement('div');
+        productCard.className = `p-4 sm:p-5 rounded-xl border transition-all duration-300 text-left relative flex flex-col justify-between cursor-pointer group hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] ${borderClass}`;
+        productCard.onclick = () => selectProduct(product.id);
+        
+        productCard.innerHTML = `
+          <!-- Badge -->
+          <div class="absolute top-3 right-3 z-10">${badgeHtml}</div>
+
+          <!-- Split elements -->
+          <div class="flex flex-col sm:flex-row gap-4 items-start">
+            <div class="w-full sm:w-20 sm:h-20 md:w-24 md:h-24 h-32 rounded-lg overflow-hidden border border-slate-100 shrink-0 bg-slate-50 relative">
+              <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </div>
+            
+            <div class="space-y-1.5 flex-1 min-w-0">
+              <div class="font-mono text-[9px] text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                ${getCategoryIconHtml(product.category)}
+                <span>ITEM CODE: ${product.id.toUpperCase()}</span>
+              </div>
+              
+              <h3 class="font-orbitron text-sm sm:text-base font-bold text-slate-800 group-hover:text-cyan-600 transition-colors line-clamp-1">
+                ${product.name}
+              </h3>
+              
+              <p class="font-sans text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                ${product.description}
+              </p>
+            </div>
+          </div>
+
+          <!-- Pricing & Action -->
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div class="font-mono">
+              <span class="text-[9px] text-slate-400 block leading-none">PRICE (USD)</span>
+              <span class="text-lg font-bold tracking-tight text-slate-800">
+                $${product.price} <span class="text-xs text-slate-500 font-medium">USD</span>
+              </span>
+            </div>
+
+            <button onclick="event.stopPropagation(); addToCart('${product.id}')" class="px-3 py-1.5 rounded-lg font-rajdhani text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-1.5 border cursor-pointer ${buttonColors} shadow-sm">
+              <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+              ADD TO BASKET
+            </button>
+          </div>
+        `;
+        
+        grid.appendChild(productCard);
+      });
+      
+      lucide.createIcons();
+    }
+
+    // --- PRODUCT SPECIFICATIONS RENDER ---
+    function renderProductSpecifications() {
+      const specPanel = document.getElementById('specifications-panel');
+      if (!selectedProduct) {
+        specPanel.innerHTML = '<div class="text-center py-6 text-slate-400 font-mono text-xs uppercase">[ NO PRODUCT SELECTED ]</div>';
+        return;
+      }
+
+      const p = selectedProduct;
+      const isSolar = p.category === 'solar';
+      
+      let borderGlow = 'border-cyan-200 shadow-sm';
+      let badgeColor = 'bg-cyan-500';
+      let titleColor = 'text-cyan-600';
+      if (p.category === 'furniture') {
+        borderGlow = 'border-amber-200 shadow-sm';
+        badgeColor = 'bg-amber-500';
+        titleColor = 'text-amber-600';
+      } else if (p.category === 'machinery') {
+        borderGlow = 'border-rose-200 shadow-sm';
+        badgeColor = 'bg-rose-500';
+        titleColor = 'text-rose-600';
+      }
+
+      let featuresHtml = p.features.map(f => `
+        <li class="flex items-start gap-2 text-xs font-sans text-slate-600">
+          <span class="w-1.5 h-1.5 rounded-full ${badgeColor} mt-1.5 shrink-0"></span>
+          <span>${f}</span>
+        </li>
+      `).join('');
+
+      let powersBlock = '';
+      if (isSolar && p.powers) {
+        let powersList = p.powers.map(pw => `
+          <div class="px-2.5 py-1.5 rounded bg-slate-50 border border-slate-100 flex items-center gap-2 text-[11px] font-medium text-slate-700">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500 shrink-0"></i>
+            <span class="truncate">${pw}</span>
+          </div>
+        `).join('');
+
+        powersBlock = `
+          <div class="mt-4 pt-4 border-t border-slate-100 space-y-3">
+            <h4 class="font-orbitron text-[10px] font-bold tracking-widest text-slate-600 uppercase flex items-center gap-1.5">
+              <i data-lucide="refrigerator" class="w-4 h-4 text-emerald-500"></i>
+              SUPPORTED APPLIANCES & LOAD CHART
+            </h4>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              ${powersList}
+            </div>
+            <p class="text-[10px] text-slate-400 font-mono italic">
+              * Note: Heavy surge appliances (stoves, geysers, aircons) should not be connected to solar hybrid setups.
+            </p>
+          </div>
+        `;
+      }
+
+      specPanel.className = `p-6 rounded-xl border bg-white relative overflow-hidden fade-transition ${borderGlow}`;
+      specPanel.innerHTML = `
+        <!-- Sci fi diagonal scanning laser line -->
+        <div class="absolute inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent top-0 animate-scanning"></div>
+        
+        <div class="flex flex-col md:flex-row gap-6">
+          <div class="w-full md:w-1/3 space-y-4">
+            <div class="relative rounded-lg overflow-hidden border border-slate-100 bg-slate-50 aspect-video md:aspect-square">
+              <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover">
+            </div>
+            <div class="flex items-center gap-2.5 font-mono text-[10px]">
+              ${getCategoryIconHtml(p.category)}
+              <span class="font-bold text-slate-500">${p.category.toUpperCase()} DEPARTMENT</span>
+            </div>
+          </div>
+
+          <div class="flex-1 space-y-4 text-left">
+            <div>
+              <span class="text-[9px] font-mono tracking-widest text-slate-400 block">JAT CERTIFIED ORIGINAL</span>
+              <h3 class="font-orbitron text-base sm:text-lg font-bold text-slate-800 flex flex-wrap items-center gap-2">
+                ${p.name}
+              </h3>
+              <div class="font-mono text-base font-bold ${titleColor} mt-1">
+                $${p.price} <span class="text-xs text-slate-500 font-medium">USD INSTALLATION INCLUDED</span>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-600 font-sans leading-relaxed">
+              ${p.description}
+            </p>
+
+            <div class="space-y-2">
+              <h4 class="font-orbitron text-[10px] font-bold tracking-widest text-slate-600 uppercase">
+                SYSTEM FEATURES & COMPONENT INVENTORY
+              </h4>
+              <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                ${featuresHtml}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        ${powersBlock}
+
+        <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="text-[10px] font-mono text-slate-400">
+            [ QR CODES: ATTACHED ON BOX • SERIAL REGISTRATION ACTIVE ]
+          </div>
+          <button onclick="addToCart('${p.id}')" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-orbitron font-bold text-xs tracking-widest rounded-lg uppercase transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer">
+            <i data-lucide="shopping-cart" class="w-4 h-4 text-cyan-400"></i>
+            ADD ITEM TO MY SHOWROOM BASKET
+          </button>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // --- BASKET STATE CONTROLS ---
+    function addToCart(productId) {
+      playSound('success');
+      const product = PRODUCTS.find(p => p.id === productId);
+      if (!product) return;
+      
+      const existing = cart.find(item => item.product.id === productId);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({ product, quantity: 1 });
+      }
+      renderCart();
+    }
+
+    function updateCartQuantity(productId, q) {
+      const existing = cart.find(item => item.product.id === productId);
+      if (!existing) return;
+      
+      playSound('click');
+      existing.quantity = q;
+      if (existing.quantity <= 0) {
+        cart = cart.filter(item => item.product.id !== productId);
+        playSound('error');
+      }
+      renderCart();
+    }
+
+    function removeFromCart(productId) {
+      playSound('error');
+      cart = cart.filter(item => item.product.id !== productId);
+      renderCart();
+    }
+
+    function getCartTotal() {
+      return cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+    }
+
+    function renderCart() {
+      const cartCont = document.getElementById('cart-container');
+      const grandTotalElem = document.getElementById('cart-grand-total');
+      
+      cartCont.innerHTML = '';
+      
+      if (cart.length === 0) {
+        cartCont.innerHTML = `
+          <div class="py-8 text-center space-y-2">
+            <p class="font-mono text-xs text-slate-500 uppercase tracking-widest">Basket is Empty</p>
+            <p class="text-[11px] text-slate-400 max-w-xs mx-auto leading-relaxed">
+              Add items from our showroom, fill in your details, and place your order instantly on WhatsApp for local delivery or quick pick-up.
+            </p>
+          </div>
+        `;
+        grandTotalElem.innerText = '$0.00';
+        return;
+      }
+
+      cart.forEach(item => {
+        const itemElem = document.createElement('div');
+        itemElem.className = 'p-3 rounded-lg bg-slate-50 border border-slate-100 flex justify-between items-center gap-2 shadow-sm';
+        itemElem.innerHTML = `
+          <div class="space-y-0.5">
+            <h4 class="font-orbitron text-xs font-bold text-slate-800 truncate max-w-[150px]">
+              ${item.product.name}
+            </h4>
+            <div class="font-mono text-[10px] text-cyan-700">
+              $${item.product.price} USD <span class="text-slate-500">ea</span>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <div class="flex items-center border border-slate-200 bg-white rounded overflow-hidden shadow-inner">
+              <button onclick="updateCartQuantity('${item.product.id}', ${item.quantity - 1})" class="px-2 py-0.5 text-xs text-slate-500 hover:bg-slate-100 cursor-pointer font-bold">-</button>
+              <span class="px-2 text-xs font-mono font-bold text-slate-700">${item.quantity}</span>
+              <button onclick="updateCartQuantity('${item.product.id}', ${item.quantity + 1})" class="px-2 py-0.5 text-xs text-slate-500 hover:bg-slate-100 cursor-pointer font-bold">+</button>
+            </div>
+            
+            <button onclick="removeFromCart('${item.product.id}')" class="p-1 text-slate-400 hover:text-rose-500 transition-colors cursor-pointer" title="Remove item">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+        cartCont.appendChild(itemElem);
+      });
+
+      grandTotalElem.innerText = `$${getCartTotal().toFixed(2)} USD`;
+      lucide.createIcons();
+    }
+
+    // --- FORM CATEGORY ROUTING ---
+    function selectCategory(cat) {
+      playSound('click');
+      selectedCategory = cat;
+      
+      // Update tabs visually
+      const tabs = ['solar', 'furniture', 'machinery'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`category-${t}`);
+        const highlight = btn.querySelector('div');
+        const icon = btn.querySelector('i');
+        
+        if (t === selectedCategory) {
+          if (t === 'solar') {
+            btn.className = "p-4 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-300 group cursor-pointer relative overflow-hidden bg-cyan-50/80 border-cyan-400 text-cyan-800 shadow-[0_4px_16px_rgba(6,182,212,0.12)]";
+            icon.className = "w-8 h-8 mb-2 transition-transform duration-300 group-hover:rotate-45 text-cyan-600 scale-110";
+          } else if (t === 'furniture') {
+            btn.className = "p-4 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-300 group cursor-pointer relative overflow-hidden bg-amber-50/50 border-amber-400 text-amber-800 shadow-[0_4px_16px_rgba(245,158,11,0.1)]";
+            icon.className = "w-8 h-8 mb-2 transition-transform duration-300 group-hover:scale-105 text-amber-600 scale-110";
+          } else {
+            btn.className = "p-4 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-300 group cursor-pointer relative overflow-hidden bg-rose-50/50 border-rose-400 text-rose-800 shadow-[0_4px_16px_rgba(244,63,94,0.1)]";
+            icon.className = "w-8 h-8 mb-2 transition-transform duration-300 group-hover:-rotate-12 text-rose-600 scale-110";
+          }
+          if (highlight) highlight.classList.remove('hidden');
+        } else {
+          btn.className = "p-4 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-300 group cursor-pointer relative overflow-hidden bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-800 shadow-[0_4px_12px_rgba(15,23,42,0.03)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.06)]";
+          icon.className = `w-8 h-8 mb-2 transition-transform duration-300 text-slate-400 ${t === 'solar' ? 'group-hover:rotate-45' : t === 'furniture' ? 'group-hover:scale-105' : 'group-hover:-rotate-12'}`;
+          if (highlight) highlight.classList.add('hidden');
+        }
+      });
+
+      // Default selected product to first of new category
+      selectedProduct = PRODUCTS.find(p => p.category === selectedCategory) || null;
+      
+      renderProducts();
+      renderProductSpecifications();
+    }
+
+    document.getElementById('category-solar').addEventListener('click', () => selectCategory('solar'));
+    document.getElementById('category-furniture').addEventListener('click', () => selectCategory('furniture'));
+    document.getElementById('category-machinery').addEventListener('click', () => selectCategory('machinery'));
+
+    function selectProduct(id) {
+      playSound('scanning');
+      selectedProduct = PRODUCTS.find(p => p.id === id) || null;
+      renderProducts();
+      renderProductSpecifications();
+    }
+
+    // --- METHOD SWITCHER ---
+    const btnPickup = document.getElementById('protocol-pickup');
+    const btnDelivery = document.getElementById('protocol-delivery');
+    const subformPickup = document.getElementById('subform-pickup');
+    const subformDelivery = document.getElementById('subform-delivery');
+
+    btnPickup.addEventListener('click', () => {
+      playSound('click');
+      orderDetails.method = 'pickup';
+      btnPickup.className = "py-2 px-3 rounded-lg border font-rajdhani text-xs font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-cyan-50 border-cyan-500 text-cyan-800 shadow-sm";
+      btnDelivery.className = "py-2 px-3 rounded-lg border font-rajdhani text-xs font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 border-slate-300 text-slate-600 hover:border-slate-400 hover:text-slate-800 shadow-sm";
+      subformPickup.classList.remove('hidden');
+      subformDelivery.classList.add('hidden');
+    });
+
+    btnDelivery.addEventListener('click', () => {
+      playSound('click');
+      orderDetails.method = 'delivery';
+      btnDelivery.className = "py-2 px-3 rounded-lg border font-rajdhani text-xs font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-amber-50 border-amber-500 text-amber-800 shadow-sm";
+      btnPickup.className = "py-2 px-3 rounded-lg border font-rajdhani text-xs font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-slate-50 border-slate-300 text-slate-600 hover:border-slate-400 hover:text-slate-800 shadow-sm";
+      subformPickup.classList.add('hidden');
+      subformDelivery.classList.remove('hidden');
+    });
+
+    // --- POPULATE ZIMBABWE CITIES ---
+    const citySelect = document.getElementById('delivery-city');
+    ZIMBABWE_CITIES.forEach(city => {
+      const opt = document.createElement('option');
+      opt.value = city;
+      opt.innerText = city;
+      citySelect.appendChild(opt);
+    });
+
+    // --- WHATSAPP COMPILING SYSTEM ---
+    const checkoutForm = document.getElementById('checkout-form');
+    const checkoutSuccess = document.getElementById('checkout-success-hub');
+
+    checkoutForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      if (cart.length === 0) {
+        playSound('error');
+        alert('Your shopping basket is empty! Please select some products first.');
+        return;
+      }
+
+      const name = document.getElementById('input-name').value;
+      const phone = document.getElementById('input-phone').value;
+      
+      if (!name || !phone) {
+        playSound('error');
+        alert('Please fill in your Name and WhatsApp phone number.');
+        return;
+      }
+
+      playSound('success');
+
+      orderDetails.name = name;
+      orderDetails.phone = phone;
+      orderDetails.notes = document.getElementById('input-notes').value;
+      
+      if (orderDetails.method === 'pickup') {
+        const checkedPickupVal = document.querySelector('input[name="pickup_loc"]:checked').value;
+        orderDetails.pickupLocation = checkedPickupVal;
+      } else {
+        orderDetails.deliveryCity = citySelect.value;
+        orderDetails.deliveryAddress = document.getElementById('delivery-address').value;
+      }
+
+      // Compile WhatsApp details
+      const phonePrimary = '263777026099';
+      let text = `🛒 *JAT VILLAGE INVESTMENTS - SHOWROOM ORDER* 🛒\n`;
+      text += `===================================\n`;
+      text += `🔖 *ORDER NO:* JAT-${Math.floor(Math.random() * 9000) + 1000}\n`;
+      text += `👤 *CUSTOMER:* ${orderDetails.name}\n`;
+      text += `📞 *PHONE:* ${orderDetails.phone}\n`;
+      text += `📦 *METHOD:* ${orderDetails.method === 'pickup' ? '🛍️ STORE PICK UP' : '🚚 LOCAL DELIVERY'}\n`;
+      
+      if (orderDetails.method === 'pickup') {
+        const loc = orderDetails.pickupLocation === 'milton_park' 
+          ? 'Milton Park Head Office (25 Harvey Brown, Harare)' 
+          : 'Harare CBD Branch (Shop 50 Cameron Street, Harare)';
+        text += `📍 *PICKUP SPOT:* ${loc}\n`;
+      } else {
+        text += `📍 *DELIVERY CITY:* ${orderDetails.deliveryCity}, Zimbabwe\n`;
+        text += `🏠 *STREET ADDRESS:* ${orderDetails.deliveryAddress}\n`;
+      }
+
+      if (orderDetails.notes) {
+        text += `📝 *SPECIAL REQUESTS:* ${orderDetails.notes}\n`;
+      }
+
+      text += `===================================\n`;
+      text += `🛍️ *SELECTED ITEMS:* \n`;
+
+      cart.forEach((item, index) => {
+        text += `${index + 1}. *${item.product.name}* \n`;
+        text += `   ↳ Qty: ${item.quantity} × Price: $${item.product.price} USD\n`;
+        text += `   ↳ Subtotal: *$${item.product.price * item.quantity} USD*\n`;
+      });
+
+      text += `===================================\n`;
+      text += `💰 *TOTAL AMOUNT:* *$${getCartTotal().toFixed(2)} USD*\n`;
+      text += `-----------------------------------\n`;
+      text += `🇿🇼 _Order sent via JAT Village Digital Showroom. Thank you for your business!_`;
+
+      const encodedText = encodeURIComponent(text);
+      const whatsappUrl = `https://wa.me/${phonePrimary}?text=${encodedText}`;
+
+      document.getElementById('link-whatsapp-send').setAttribute('href', whatsappUrl);
+      
+      // Toggle Views
+      document.getElementById('checkout-form').classList.add('hidden');
+      checkoutSuccess.classList.remove('hidden');
+    });
+
+    document.getElementById('btn-edit-transmission').addEventListener('click', () => {
+      playSound('click');
+      document.getElementById('checkout-form').classList.remove('hidden');
+      checkoutSuccess.classList.add('hidden');
+    });
+
+    // --- MAIN INITIALIZATION RUN ---
+    renderProducts();
+    renderProductSpecifications();
+    renderCart();
+
+  </script>
+</body>
+</html>
