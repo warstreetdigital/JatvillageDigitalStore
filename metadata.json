@@ -1,0 +1,6 @@
+{
+  "name": "JAT Village Portal",
+  "description": "Futuristic QR-scannable digital store for solar packages, furniture, and tools in Zimbabwe.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
